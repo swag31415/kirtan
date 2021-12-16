@@ -17,8 +17,29 @@ function get_binding(offset) {
     octave = Math.floor(index / 7)
     return [key, pitch && pitch + octave]
   })
+  function show_keys(mapping, type) {
+    let key_templ = document.getElementById(type)
+    let lab_templ = document.querySelector(`[for=${type}]`)
+    mapping.forEach(([key, note], i) => {
+      if (note != null) {
+        let tmp = key_templ.cloneNode()
+        let ltmp = lab_templ.cloneNode()
+        let transform = `translate(${i*60},0)`
+        tmp.setAttribute('transform', transform)
+        ltmp.setAttribute('transform', transform)
+        tmp.classList.add(type)
+        ltmp.classList.add(type)
+        tmp.id = note
+        ltmp.textContent = note
+        key_templ.after(tmp)
+        lab_templ.after(ltmp)
+      }
+    })
+  }
   let low_mapping = map_keys(keys.keyboard.low, keys.piano.low)
   let high_mapping = map_keys(keys.keyboard.high, keys.piano.high)
+  show_keys(low_mapping, 'lowkey')
+  show_keys(high_mapping, 'highkey')
   return Object.fromEntries([...low_mapping, ...high_mapping])
 }
 
@@ -36,6 +57,7 @@ document.addEventListener('keydown', e => {
     if (!pressed[e.key]) {
       synth.triggerAttack(binding[e.key])
       pressed[e.key] = true
+      document.getElementById(binding[e.key]).classList.add('active')
     }
   }
 })
@@ -45,5 +67,6 @@ document.addEventListener('keyup', e => {
     e.preventDefault()
     synth.triggerRelease(binding[e.key])
     pressed[e.key] = false
+    document.getElementById(binding[e.key]).classList.remove('active')
   }
 })

@@ -11,6 +11,17 @@
 <body>
   <main>
     <p>Use number keys and querty to play the harmonium!</p>
+    <svg height="325" width="802" viewBox="0 0 802 325">
+      <g stroke="#222">
+        <style type="text/css">path.active { fill: #F4C430; }</style>
+        <path id="lowkey" d="m0 0 .34 310c.66 10 6.66 15 16.66 15h27c6 1 11-3 16-11v-314z" fill="#fff" transform="translate(-120,0)"/>
+        <path id="highkey" d="m22 217v-216.65l-44-.35 1 216c0 18 5 19 16 19h9c13 0 18-4 18-18z" fill="#222" transform="translate(-120,0)"/>
+      </g>
+      <g font-family="Arial, sans-serif" style="pointer-events: none;">
+        <text for="lowkey" fill="#000" font-size="20" x="18" y="297" transform="translate(-120,0)">B4</text>
+        <text for="highkey" fill="#fff" font-size="20" x="-16" y="221" transform="translate(-120,0)">A#4</text>
+      </g>
+    </svg>
   </main>
   <!-- Tone.js -->
   <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
