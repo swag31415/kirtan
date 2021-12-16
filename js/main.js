@@ -22,7 +22,11 @@ function get_binding(offset) {
   return Object.fromEntries([...low_mapping, ...high_mapping])
 }
 
-const synth = new Tone.PolySynth(Tone.Synth).toDestination()
+const samples = ['A#2','A#3','A#4','A2','A3','A4','B2','B3','B4','C#2','C#3','C#4','C#5','C2','C3','C4','C5','D#2','D#3','D#4','D2','D3','D4','D5','E2','E3','E4','F#2','F#3','F#4','F2','F3','F4','G#2','G#3','G#4','G2','G3','G4']
+const synth = new Tone.Sampler({
+	urls: Object.fromEntries(samples.map(note => [note, note.replace('#', '%23') + '.wav'])),
+	baseUrl: "http://localhost:8000/samples/harmonium/",
+}).toDestination();
 const binding = get_binding(-2)
 const pressed = {}
 
