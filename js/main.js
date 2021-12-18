@@ -55,9 +55,13 @@ document.addEventListener('keydown', e => {
   if (binding[e.key]) {
     e.preventDefault()
     if (!pressed[e.key]) {
-      synth.triggerAttack(binding[e.key])
-      pressed[e.key] = true
-      document.getElementById(binding[e.key]).classList.add('active')
+      try {
+        synth.triggerAttack(binding[e.key])
+        pressed[e.key] = true
+        document.getElementById(binding[e.key]).classList.add('active')
+      } catch {
+        M.toast({html: 'Still loading, give it a second'})
+      }
     }
   }
 })
