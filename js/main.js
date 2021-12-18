@@ -20,6 +20,7 @@ function get_binding(offset) {
   function show_keys(mapping, type) {
     let key_templ = document.getElementById(type)
     let lab_templ = document.querySelector(`[for=${type}]`)
+    document.querySelectorAll('.'+type).forEach(e => e.remove())
     mapping.forEach(([key, note], i) => {
       if (note != null) {
         let tmp = key_templ.cloneNode()
@@ -48,7 +49,8 @@ const synth = new Tone.Sampler({
 	urls: Object.fromEntries(samples.map(note => [note, note.replace('#', '%23') + '.wav'])),
 	baseUrl: "https://swag31415.github.io/kirtan/samples/harmonium/",
 }).toDestination();
-const binding = get_binding(-2)
+var key_index = -2
+var binding = get_binding(key_index)
 const pressed = {}
 
 document.addEventListener('keydown', e => {
@@ -63,6 +65,12 @@ document.addEventListener('keydown', e => {
         M.toast({html: 'Still loading, give it a second'})
       }
     }
+  } else if (e.key == 'ArrowLeft') {
+    key_index += 1
+    binding = get_binding(key_index)
+  } else if (e.key == 'ArrowRight') {
+    key_index -= 1
+    binding = get_binding(key_index)
   }
 })
 
