@@ -49,7 +49,7 @@ const synth = new Tone.Sampler({
 	urls: Object.fromEntries(samples.map(note => [note, note.replace('#', '%23') + '.wav'])),
 	baseUrl: "https://swag31415.github.io/kirtan/samples/harmonium/",
 }).toDestination();
-var key_index = -2
+var key_index = -8
 var binding = get_binding(key_index)
 const pressed = {}
 
