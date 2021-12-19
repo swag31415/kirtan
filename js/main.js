@@ -51,6 +51,7 @@ const synth = new Tone.Sampler({
 }).toDestination();
 var key_index = -8
 var binding = get_binding(key_index)
+const valid_index_range = { min: -25, max: 54 }
 const pressed = {}
 
 document.addEventListener('keydown', e => {
@@ -65,10 +66,10 @@ document.addEventListener('keydown', e => {
         M.toast({html: 'Still loading, give it a second'})
       }
     }
-  } else if (e.key == 'ArrowLeft') {
+  } else if (e.key == 'ArrowLeft' && key_index < valid_index_range.max) {
     key_index += 1
     binding = get_binding(key_index)
-  } else if (e.key == 'ArrowRight') {
+  } else if (e.key == 'ArrowRight' && key_index > valid_index_range.min) {
     key_index -= 1
     binding = get_binding(key_index)
   }
