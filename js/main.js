@@ -83,3 +83,19 @@ document.addEventListener('keyup', e => {
     document.getElementById(binding[e.key]).classList.remove('active')
   }
 })
+
+const clear_triggered = () => document.querySelectorAll('path.trigger').forEach(path => path.classList.remove('trigger'))
+document.getElementById('pitch-detection').addEventListener('click', e => {
+  Pitch_Detector.start({
+    onNote: function (note) {
+      let key = document.getElementById(note)
+      if (key) {
+        clear_triggered()
+        key.classList.add('trigger')
+      }
+    },
+    onPause: function () {
+      clear_triggered()
+    }
+  })
+})
