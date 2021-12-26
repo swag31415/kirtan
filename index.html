@@ -10,7 +10,7 @@
 
 <body>
   <insert-html link="https://swag31415.github.io/Portfolio/inserts/menu.html"></insert-html>
-  <main class="container">
+  <main id="app" class="container">
     <h2>Browser Kirtan!</h2>
     <p>Use number keys and querty to play the harmonium! Use your arrow keys to change the scale.</p>
     <svg height="325" width="802" viewBox="0 0 802 325">
@@ -24,10 +24,8 @@
         <text for="highkey" fill="#fff" font-size="20" x="-16" y="221" transform="translate(-120,0)">A#4</text>
       </g>
     </svg>
-    <div id="pitch-switch">
-      <p v-if="!on">Want to know if you're hitting the right notes? Try turning on <a href="#!" v-on:click="enable">pitch detection</a> and see notes that match with your voice get highlighted.</p>
-      <p v-if="on">Pitch-Detection is running. <a href="#!" v-on:click="disable">Click here to turn it off</a>.</p>
-    </div>
+    <p v-if="!pitch_on">Want to know if you're hitting the right notes? Try turning on <a href="#!" v-on:click="pitch_enable">pitch detection</a> and see notes that match with your voice get highlighted.</p>
+    <p v-if="pitch_on">Pitch-Detection is running. <a href="#!" v-on:click="pitch_disable">Click here to turn it off</a>.</p>
   </main>
   <insert-html link="https://swag31415.github.io/Portfolio/inserts/foot.html"></insert-html>
   <!-- HTML Inserts -->

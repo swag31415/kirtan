@@ -86,11 +86,11 @@ document.addEventListener('keyup', e => {
 
 
 new Vue({
-  el: '#pitch-switch',
-  data: { on: false },
+  el: '#app',
+  data: { pitch_on: false },
   methods: {
-    enable: function () {
-      this.on = true
+    pitch_enable: function () {
+      this.pitch_on = true
       let clear_triggered = () => document.querySelectorAll('path.trigger').forEach(path => path.classList.remove('trigger'))
       Pitch_Detector.start({
         onNote: function (note) {
@@ -105,8 +105,8 @@ new Vue({
         }
       })
     },
-    disable: function () {
-      this.on = false
+    pitch_disable: function () {
+      this.pitch_on = false
       Pitch_Detector.stop()
     }
   }
