@@ -24,11 +24,16 @@
         <text for="highkey" fill="#fff" font-size="20" x="-16" y="221" transform="translate(-120,0)">A#4</text>
       </g>
     </svg>
-    <button id="pitch-detection" class="btn">Enable Pitch Detection</button>
+    <div id="pitch-switch">
+      <p v-if="!on">Want to know if you're hitting the right notes? Try turning on <a href="#!" v-on:click="enable">pitch detection</a> and see notes that match with your voice get highlighted.</p>
+      <p v-if="on">Pitch-Detection is running. <a href="#!" v-on:click="disable">Click here to turn it off</a>.</p>
+    </div>
   </main>
   <insert-html link="https://swag31415.github.io/Portfolio/inserts/foot.html"></insert-html>
   <!-- HTML Inserts -->
   <script src="https://swag31415.github.io/Portfolio/js/html_inserts.js"></script>
+  <!-- Vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
   <!-- Tone.js -->
   <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
   <!-- Pitch Detection -->

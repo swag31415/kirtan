@@ -3,11 +3,8 @@ const Pitch_Detector = {
   buffer: new Float32Array(2048),
   tone_buffer: [],
   audio_context: Tone.context,
-  start: async function (params) {
-    if (this.running) return false
-    this.running = true
-    Object.assign(this, params)
-    stream = await navigator.mediaDevices.getUserMedia({"audio": {
+  init: async function () {
+    let stream = await navigator.mediaDevices.getUserMedia({"audio": {
       "mandatory": {
         "googEchoCancellation": "false",
         "googAutoGainControl": "false",
@@ -18,9 +15,21 @@ const Pitch_Detector = {
     this.analyser = this.audio_context.createAnalyser()
     this.analyser.fftSize = this.buffer_size
     this.audio_context.createMediaStreamSource(stream).connect(this.analyser)
-    setInterval(() => this.update(), 100)
+    this.has_init = true
+  },
+  start: function (params) {
+    if (this.running) return false
+    this.running = true
+    Object.assign(this, params)
+    if (!this.has_init) this.init()
+    this.interval = setInterval(() => this.update(), 100)
+  },
+  stop: function () {
+    clearInterval(this.interval)
+    this.running = false
   },
   update: function () {
+    if (!this.has_init) return false
     this.analyser.getFloatTimeDomainData(this.buffer)
     let res = this.autoCorrelate(this.buffer, this.audio_context.sampleRate)
     if (res > 0) {
@@ -81,18 +90,3 @@ const Pitch_Detector = {
     return sampleRate / T0
   }
 }
-
-// var noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
-
-// function noteFromPitch(frequency) {
-//   var noteNum = 12 * (Math.log(frequency / 440)/Math.log(2))
-//   return Math.round(noteNum) + 69
-// }
-
-// function frequencyFromNoteNumber(note) {
-//   return 440 * Math.pow(2,(note-69)/12)
-// }
-
-// function centsOffFromPitch(frequency, note) {
-//   return Math.floor(1200 * Math.log(frequency / frequencyFromNoteNumber(note))/Math.log(2))
-// }
