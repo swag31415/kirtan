@@ -54,6 +54,7 @@ var binding = get_binding(key_index)
 const valid_index_range = { min: -25, max: 54 }
 const pressed = {}
 
+var record = []
 document.addEventListener('keydown', e => {
   if (binding[e.key]) {
     e.preventDefault()
@@ -62,6 +63,7 @@ document.addEventListener('keydown', e => {
         synth.triggerAttack(binding[e.key])
         pressed[e.key] = true
         document.getElementById(binding[e.key]).classList.add('active')
+        if (app.recording) record.push({key: binding[e.key], stroke: 'down', time: Tone.now() - app.record_start_time})
       } catch {
         M.toast({html: 'Still loading, give it a second'})
       }
@@ -81,13 +83,18 @@ document.addEventListener('keyup', e => {
     synth.triggerRelease(binding[e.key])
     pressed[e.key] = false
     document.getElementById(binding[e.key]).classList.remove('active')
+    if (app.recording) record.push({key: binding[e.key], stroke: 'up', time: Tone.now()})
   }
 })
 
-
-new Vue({
+const app = new Vue({
   el: '#app',
-  data: { pitch_on: false },
+  data: {
+    pitch_on: false,
+    record_start_time: 0,
+    recording: false,
+    recordings: []
+  },
   methods: {
     pitch_enable: function () {
       this.pitch_on = true
@@ -108,6 +115,32 @@ new Vue({
     pitch_disable: function () {
       this.pitch_on = false
       Pitch_Detector.stop()
+    },
+    start_recording: function () {
+      this.recording = true
+      this.record_start_time = Tone.now()
+    },
+    stop_recording: function () {
+      this.recording = false
+      this.recordings.push({
+        name: 'Recording ' + (this.recordings.length + 1),
+        data: record
+      })
+      record = []
+    },
+    download: function (data) {
+      console.log(data)
+    },
+    play: function (data) {
+      let now = Tone.now()
+      console.log(data)
+      data.forEach(e => {
+        if (e.stroke == 'down') {
+          synth.triggerAttack(e.key, now + e.time)
+        } else if (e.stroke == 'up') {
+          synth.triggerRelease(e.key, now + e.time)
+        }
+      })
     }
   }
 })

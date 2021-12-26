@@ -3,6 +3,8 @@
 <head>
   <title>kirtan</title>
   <link rel="icon" href="logo.png" type="image/x-icon">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://swag31415.github.io/Portfolio/css/fontawesome-free-6.0.0-beta2-web/css/all.min.css">
   <!-- Our Styles -->
   <link rel="stylesheet" href="css/main.css">
   <insert-html link="https://swag31415.github.io/Portfolio/inserts/head.html"></insert-html>
@@ -10,7 +12,7 @@
 
 <body>
   <insert-html link="https://swag31415.github.io/Portfolio/inserts/menu.html"></insert-html>
-  <main id="app" class="container">
+  <main class="container">
     <h2>Browser Kirtan!</h2>
     <p>Use number keys and querty to play the harmonium! Use your arrow keys to change the scale.</p>
     <svg height="325" width="802" viewBox="0 0 802 325">
@@ -24,8 +26,21 @@
         <text for="highkey" fill="#fff" font-size="20" x="-16" y="221" transform="translate(-120,0)">A#4</text>
       </g>
     </svg>
-    <p v-if="!pitch_on">Want to know if you're hitting the right notes? Try turning on <a href="#!" v-on:click="pitch_enable">pitch detection</a> and see notes that match with your voice get highlighted.</p>
-    <p v-if="pitch_on">Pitch-Detection is running. <a href="#!" v-on:click="pitch_disable">Click here to turn it off</a>.</p>
+    <div id="app">
+      <p v-if="!pitch_on">Want to know if you're hitting the right notes? Try turning on <a href="#!" v-on:click="pitch_enable">pitch detection</a> and see notes that match with your voice get highlighted.</p>
+      <p v-if="pitch_on">Pitch-Detection is running. <a href="#!" v-on:click="pitch_disable">Click here to turn it off</a>.</p>
+      <p v-if="!recording">You can also record yourself and see them below. <a href="#!" v-on:click="start_recording">Click here to start recording</a>!</p>
+      <p v-if="recording">You are currently recording! <a href="#!" v-on:click="stop_recording">Click here to stop and save the recording</a>.</p>
+      <ul class="collection" v-for="record in recordings">
+        <li class="collection-item">
+          <span>{{ record.name }}</span>
+          <span class="right">
+            <a href="#!" v-on:click="download(record.data)"><i class="fas fa-download fa-lg"></i> Download</a>
+            <a href="#!" v-on:click="play(record.data)"><i class="fas fa-play fa-lg"></i> Play</a>
+          </span>
+        </li>
+      </ul>
+    </div>
   </main>
   <insert-html link="https://swag31415.github.io/Portfolio/inserts/foot.html"></insert-html>
   <!-- HTML Inserts -->
