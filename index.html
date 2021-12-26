@@ -15,7 +15,7 @@
     <p>Use number keys and querty to play the harmonium! Use your arrow keys to change the scale.</p>
     <svg height="325" width="802" viewBox="0 0 802 325">
       <g stroke="#222">
-        <style type="text/css">path.active { fill: #F4C430; }</style>
+        <style type="text/css">path.active { fill: #F4C430; } path.trigger { fill: #93f8ff; }</style>
         <path id="lowkey" d="m0 0 .34 310c.66 10 6.66 15 16.66 15h27c6 1 11-3 16-11v-314z" fill="#fff" transform="translate(-120,0)"/>
         <path id="highkey" d="m22 217v-216.65l-44-.35 1 216c0 18 5 19 16 19h9c13 0 18-4 18-18z" fill="#222" transform="translate(-120,0)"/>
       </g>
@@ -24,12 +24,20 @@
         <text for="highkey" fill="#fff" font-size="20" x="-16" y="221" transform="translate(-120,0)">A#4</text>
       </g>
     </svg>
+    <div id="pitch-switch">
+      <p v-if="!on">Want to know if you're hitting the right notes? Try turning on <a href="#!" v-on:click="enable">pitch detection</a> and see notes that match with your voice get highlighted.</p>
+      <p v-if="on">Pitch-Detection is running. <a href="#!" v-on:click="disable">Click here to turn it off</a>.</p>
+    </div>
   </main>
   <insert-html link="https://swag31415.github.io/Portfolio/inserts/foot.html"></insert-html>
   <!-- HTML Inserts -->
   <script src="https://swag31415.github.io/Portfolio/js/html_inserts.js"></script>
+  <!-- Vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
   <!-- Tone.js -->
   <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
+  <!-- Pitch Detection -->
+  <script src="js/pitch_detection.js"></script>
   <!-- Our Scripts -->
   <script src="js/main.js"></script>
 </body>

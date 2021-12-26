@@ -83,3 +83,31 @@ document.addEventListener('keyup', e => {
     document.getElementById(binding[e.key]).classList.remove('active')
   }
 })
+
+
+new Vue({
+  el: '#pitch-switch',
+  data: { on: false },
+  methods: {
+    enable: function () {
+      this.on = true
+      let clear_triggered = () => document.querySelectorAll('path.trigger').forEach(path => path.classList.remove('trigger'))
+      Pitch_Detector.start({
+        onNote: function (note) {
+          let key = document.getElementById(note)
+          if (key) {
+            clear_triggered()
+            key.classList.add('trigger')
+          }
+        },
+        onPause: function () {
+          clear_triggered()
+        }
+      })
+    },
+    disable: function () {
+      this.on = false
+      Pitch_Detector.stop()
+    }
+  }
+})
