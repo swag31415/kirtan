@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>kirtan</title>
   <link rel="icon" href="logo.png" type="image/x-icon">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://swag31415.github.io/Portfolio/css/fontawesome-free-6.0.0-beta2-web/css/all.min.css">
   <!-- Our Styles -->
   <link rel="stylesheet" href="css/main.css">
   <insert-html link="https://swag31415.github.io/Portfolio/inserts/head.html"></insert-html>
@@ -12,23 +14,35 @@
 
 <body>
   <insert-html link="https://swag31415.github.io/Portfolio/inserts/menu.html"></insert-html>
-  <main class="container">
+  <main id="app" class="container">
     <h2>Browser Kirtan!</h2>
     <p>Use number keys and querty to play the harmonium! Use your arrow keys to change the scale.</p>
     <svg height="325" width="802" viewBox="0 0 802 325">
       <g stroke="#222">
         <style type="text/css">path.active { fill: #F4C430; } path.trigger { fill: #93f8ff; }</style>
-        <path id="lowkey" d="m0 0 .34 310c.66 10 6.66 15 16.66 15h27c6 1 11-3 16-11v-314z" fill="#fff" transform="translate(-120,0)"/>
-        <path id="highkey" d="m22 217v-216.65l-44-.35 1 216c0 18 5 19 16 19h9c13 0 18-4 18-18z" fill="#222" transform="translate(-120,0)"/>
+        <path d="m0 0 .34 310c.66 10 6.66 15 16.66 15h27c6 1 11-3 16-11v-314z" v-for="(val, key) in binding.low" v-bind:fill="val.pressed ? '#F4C430' : (val.highlight ? '#93f8ff' : '#fff')" v-bind:transform="val.transform"/>
+        <path d="m22 217v-216.65l-44-.35 1 216c0 18 5 19 16 19h9c13 0 18-4 18-18z" v-for="(val, key) in binding.high" v-bind:fill="val.pressed ? '#F4C430' : (val.highlight ? '#93f8ff' : '#222')" v-bind:transform="val.transform"/>
       </g>
       <g font-family="Arial, sans-serif" style="pointer-events: none;">
-        <text for="lowkey" fill="#000" font-size="20" x="18" y="297" transform="translate(-120,0)">B4</text>
-        <text for="highkey" fill="#fff" font-size="20" x="-16" y="221" transform="translate(-120,0)">A#4</text>
+        <text font-size="20" x="18" y="297" fill="#000" v-for="(val, key) in binding.low" v-bind:transform="val.transform">{{ val.pitch }}</text>
+        <text font-size="20" x="-16" y="221" fill="#fff" v-for="(val, key) in binding.high" v-bind:transform="val.transform">{{ val.pitch }}</text>
       </g>
     </svg>
-    <div id="pitch-switch">
-      <p v-if="!on">Want to know if you're hitting the right notes? Try turning on <a href="#!" v-on:click="enable">pitch detection</a> and see notes that match with your voice get highlighted.</p>
-      <p v-if="on">Pitch-Detection is running. <a href="#!" v-on:click="disable">Click here to turn it off</a>.</p>
+    <div>
+      <p v-if="!pitch_on">Want to know if you're hitting the right notes? Try turning on <a href="#!" v-on:click="pitch_enable">pitch detection</a> and see notes that match with your voice get highlighted.</p>
+      <p v-if="pitch_on">Pitch-Detection is running. <a href="#!" v-on:click="pitch_disable">Click here to turn it off</a>.</p>
+      <p v-if="!recording">You can also record yourself and see them below. <a href="#!" v-on:click="start_recording">Click here to start recording</a>!</p>
+      <p v-if="recording">You are currently recording! <a href="#!" v-on:click="stop_recording">Click here to stop and save the recording</a>.</p>
+      <ul class="collection">
+        <li class="collection-item row" v-for="(record, index) in recordings">
+          <input type="text" class="col s4" v-model="record.name"></input>
+          <div class="right col">
+            <a href="#!" v-on:click="remove_recording(index)"><i class="fas fa-trash"></i> Delete</a>
+            <a href="#!" v-on:click="download(record)"><i class="fas fa-download fa-lg"></i> Download</a>
+            <a href="#!" v-on:click="play(record.data)"><i class="fas fa-play fa-lg"></i> Play</a>
+          </div>
+        </li>
+      </ul>
     </div>
   </main>
   <insert-html link="https://swag31415.github.io/Portfolio/inserts/foot.html"></insert-html>
@@ -40,6 +54,8 @@
   <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
   <!-- Pitch Detection -->
   <script src="js/pitch_detection.js"></script>
+  <!-- FileSaver -->
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.2/dist/FileSaver.min.js"></script>
   <!-- Our Scripts -->
   <script src="js/main.js"></script>
 </body>
