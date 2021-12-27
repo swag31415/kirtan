@@ -40,7 +40,8 @@ var key_index = -8
 const valid_index_range = { min: -25, max: 54 }
 
 var record = []
-document.addEventListener('keydown', e => {
+document.body.addEventListener('keydown', function (e) {
+  if (this != e.target) return;
   let key = app.get_note(e.key)
   if (key) {
     e.preventDefault()
@@ -62,7 +63,8 @@ document.addEventListener('keydown', e => {
   }
 })
 
-document.addEventListener('keyup', e => {
+document.body.addEventListener('keyup', function (e) {
+  if (this != e.target) return;
   let key = app.get_note(e.key)
   if (key) {
     e.preventDefault()
@@ -81,6 +83,14 @@ const app = new Vue({
     recording: false,
     recordings: JSON.parse(localStorage.getItem('recordings')) || [],
     binding: get_binding(key_index)
+  },
+  watch: {
+    recordings: {
+      handler: function (v) {
+        localStorage.setItem('recordings', JSON.stringify(v))
+      },
+      deep: true
+    }
   },
   methods: {
     pitch_enable: function () {
@@ -110,7 +120,6 @@ const app = new Vue({
         name: 'Recording ' + (this.recordings.length + 1),
         data: this.buffer
       })
-      localStorage.setItem('recordings', JSON.stringify(this.recordings))
       this.buffer = []
     },
     record: function (pitch, stroke) {
@@ -120,8 +129,9 @@ const app = new Vue({
         time: Tone.now() - this.record_start_time
       })
     },
-    download: function (data) {
-      console.log(data)
+    download: function (record) {
+      var blob = new Blob([JSON.stringify(record)], { type: "application/json" })
+      saveAs(blob, record.name + '.json')
     },
     play: function (data) {
       let now = Tone.now()
@@ -149,7 +159,6 @@ const app = new Vue({
     },
     remove_recording: function (index) {
       this.recordings.splice(index, 1)
-      localStorage.setItem('recordings', JSON.stringify(this.recordings))
     },
     get_note: function (key) {
       return this.binding.low[key] || this.binding.high[key]

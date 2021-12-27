@@ -32,13 +32,13 @@
       <p v-if="!recording">You can also record yourself and see them below. <a href="#!" v-on:click="start_recording">Click here to start recording</a>!</p>
       <p v-if="recording">You are currently recording! <a href="#!" v-on:click="stop_recording">Click here to stop and save the recording</a>.</p>
       <ul class="collection">
-        <li class="collection-item" v-for="(record, index) in recordings">
-          <span>{{ record.name }}</span>
-          <span class="right">
+        <li class="collection-item row" v-for="(record, index) in recordings">
+          <input type="text" class="col s4" v-model="record.name"></input>
+          <div class="right col">
             <a href="#!" v-on:click="remove_recording(index)"><i class="fas fa-trash"></i> Delete</a>
-            <a href="#!" v-on:click="download(record.data)"><i class="fas fa-download fa-lg"></i> Download</a>
+            <a href="#!" v-on:click="download(record)"><i class="fas fa-download fa-lg"></i> Download</a>
             <a href="#!" v-on:click="play(record.data)"><i class="fas fa-play fa-lg"></i> Play</a>
-          </span>
+          </div>
         </li>
       </ul>
     </div>
@@ -52,6 +52,8 @@
   <script src="https://unpkg.com/tone@14.7.77/build/Tone.js"></script>
   <!-- Pitch Detection -->
   <script src="js/pitch_detection.js"></script>
+  <!-- FileSaver -->
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.2/dist/FileSaver.min.js"></script>
   <!-- Our Scripts -->
   <script src="js/main.js"></script>
 </body>
