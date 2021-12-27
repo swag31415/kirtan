@@ -10,38 +10,25 @@ const keys = {
 }
 
 function get_binding(offset) {
-  const wrapped_get = (arr, i) => arr[(i + arr.length) % arr.length]
-  const map_keys = (keyboard, piano) => keyboard.map((key, i) => {
-    index = i + offset + 4*7-3 // Add an offset to make 'e' middle-c by default
-    pitch = wrapped_get(piano, index)
-    octave = Math.floor(index / 7)
-    return [key, pitch && pitch + octave]
-  })
-  function show_keys(mapping, type) {
-    let key_templ = document.getElementById(type)
-    let lab_templ = document.querySelector(`[for=${type}]`)
-    document.querySelectorAll('.'+type).forEach(e => e.remove())
-    mapping.forEach(([key, note], i) => {
-      if (note != null) {
-        let tmp = key_templ.cloneNode()
-        let ltmp = lab_templ.cloneNode()
-        let transform = `translate(${i*60},0)`
-        tmp.setAttribute('transform', transform)
-        ltmp.setAttribute('transform', transform)
-        tmp.classList.add(type)
-        ltmp.classList.add(type)
-        tmp.id = note
-        ltmp.textContent = note
-        key_templ.after(tmp)
-        lab_templ.after(ltmp)
+  function map_keys(keyboard, piano) {
+    const wrapped_get = (arr, i) => arr[(i + arr.length) % arr.length]
+    return keyboard.reduce((obj, key, i) => {
+      index = i + offset + 4*7-3 // Add an offset to make 'e' middle-c by default
+      pitch = wrapped_get(piano, index)
+      octave = Math.floor(index / 7)
+      if (pitch) obj[key] = {
+        pitch: pitch + octave,
+        transform: `translate(${i*60},0)`,
+        pressed: false,
+        highlight: false
       }
-    })
+      return obj
+    }, {})
   }
-  let low_mapping = map_keys(keys.keyboard.low, keys.piano.low)
-  let high_mapping = map_keys(keys.keyboard.high, keys.piano.high)
-  show_keys(low_mapping, 'lowkey')
-  show_keys(high_mapping, 'highkey')
-  return Object.fromEntries([...low_mapping, ...high_mapping])
+  return {
+    low: map_keys(keys.keyboard.low, keys.piano.low, key_index),
+    high: map_keys(keys.keyboard.high, keys.piano.high, key_index)
+  }
 }
 
 const samples = ['A#2','A#3','A#4','A2','A3','A4','B2','B3','B4','C#2','C#3','C#4','C#5','C2','C3','C4','C5','D#2','D#3','D#4','D2','D3','D4','D5','E2','E3','E4','F#2','F#3','F#4','F2','F3','F4','G#2','G#3','G#4','G2','G3','G4']
@@ -50,40 +37,38 @@ const synth = new Tone.Sampler({
 	baseUrl: "https://swag31415.github.io/kirtan/samples/harmonium/",
 }).toDestination();
 var key_index = -8
-var binding = get_binding(key_index)
 const valid_index_range = { min: -25, max: 54 }
-const pressed = {}
 
 var record = []
 document.addEventListener('keydown', e => {
-  if (binding[e.key]) {
+  let key = app.get_note(e.key)
+  if (key) {
     e.preventDefault()
-    if (!pressed[e.key]) {
+    if (!key.pressed) {
       try {
-        synth.triggerAttack(binding[e.key])
-        pressed[e.key] = true
-        document.getElementById(binding[e.key]).classList.add('active')
-        if (app.recording) record.push({key: binding[e.key], stroke: 'down', time: Tone.now() - app.record_start_time})
+        synth.triggerAttack(key.pitch)
+        key.pressed = true
+        app.record(key.pitch, 'down')
       } catch {
         M.toast({html: 'Still loading, give it a second'})
       }
     }
   } else if (e.key == 'ArrowLeft' && key_index < valid_index_range.max) {
     key_index += 1
-    binding = get_binding(key_index)
+    app.binding = get_binding(key_index)
   } else if (e.key == 'ArrowRight' && key_index > valid_index_range.min) {
     key_index -= 1
-    binding = get_binding(key_index)
+    app.binding = get_binding(key_index)
   }
 })
 
 document.addEventListener('keyup', e => {
-  if (binding[e.key]) {
+  let key = app.get_note(e.key)
+  if (key) {
     e.preventDefault()
-    synth.triggerRelease(binding[e.key])
-    pressed[e.key] = false
-    document.getElementById(binding[e.key]).classList.remove('active')
-    if (app.recording) record.push({key: binding[e.key], stroke: 'up', time: Tone.now()})
+    synth.triggerRelease(key.pitch)
+    key.pressed = false
+    app.record(key.pitch, 'up')
   }
 })
 
@@ -92,23 +77,22 @@ const app = new Vue({
   data: {
     pitch_on: false,
     record_start_time: 0,
+    buffer: [],
     recording: false,
-    recordings: []
+    recordings: [],
+    binding: get_binding(key_index)
   },
   methods: {
     pitch_enable: function () {
       this.pitch_on = true
-      let clear_triggered = () => document.querySelectorAll('path.trigger').forEach(path => path.classList.remove('trigger'))
       Pitch_Detector.start({
         onNote: function (note) {
-          let key = document.getElementById(note)
-          if (key) {
-            clear_triggered()
-            key.classList.add('trigger')
-          }
+          app.clear_all('highlight')
+          let key = app.get_key(note)
+          if (key) key.highlight = true
         },
         onPause: function () {
-          clear_triggered()
+          app.clear_all('highlight')
         }
       })
     },
@@ -124,23 +108,52 @@ const app = new Vue({
       this.recording = false
       this.recordings.push({
         name: 'Recording ' + (this.recordings.length + 1),
-        data: record
+        data: this.buffer
       })
-      record = []
+      this.buffer = []
+    },
+    record: function (pitch, stroke) {
+      if (this.recording) this.buffer.push({
+        key: pitch,
+        stroke: stroke,
+        time: Tone.now() - this.record_start_time
+      })
     },
     download: function (data) {
       console.log(data)
     },
     play: function (data) {
       let now = Tone.now()
-      console.log(data)
       data.forEach(e => {
         if (e.stroke == 'down') {
+          setTimeout(() => {
+            let key = this.get_key(e.key)
+            if (key) key.pressed = true
+            app.record(key.pitch, 'down') // Yes we record the autoplay
+          }, e.time * 1000)
           synth.triggerAttack(e.key, now + e.time)
         } else if (e.stroke == 'up') {
+          setTimeout(() => {
+            let key = this.get_key(e.key)
+            if (key) key.pressed = false
+            app.record(key.pitch, 'up') // Yes we record the autoplay
+          }, e.time * 1000)
           synth.triggerRelease(e.key, now + e.time)
         }
       })
+    },
+    get_note: function (key) {
+      return this.binding.low[key] || this.binding.high[key]
+    },
+    get_key: function (note) {
+      let keys = Object.values({...this.binding.low, ...this.binding.high})
+      for (const key of keys) {
+        if (key.pitch == note) return key
+      }
+    },
+    clear_all: function (attr) {
+      let keys = Object.values({...this.binding.low, ...this.binding.high})
+      keys.forEach(v => v[attr] = false)
     }
   }
 })
