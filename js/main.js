@@ -79,7 +79,7 @@ const app = new Vue({
     record_start_time: 0,
     buffer: [],
     recording: false,
-    recordings: [],
+    recordings: JSON.parse(localStorage.getItem('recordings')) || [],
     binding: get_binding(key_index)
   },
   methods: {
@@ -110,6 +110,7 @@ const app = new Vue({
         name: 'Recording ' + (this.recordings.length + 1),
         data: this.buffer
       })
+      localStorage.setItem('recordings', JSON.stringify(this.recordings))
       this.buffer = []
     },
     record: function (pitch, stroke) {
@@ -128,19 +129,27 @@ const app = new Vue({
         if (e.stroke == 'down') {
           setTimeout(() => {
             let key = this.get_key(e.key)
-            if (key) key.pressed = true
-            app.record(key.pitch, 'down') // Yes we record the autoplay
+            if (key) {
+              key.pressed = true
+              app.record(key.pitch, 'down') // Yes we record the autoplay
+            }
           }, e.time * 1000)
           synth.triggerAttack(e.key, now + e.time)
         } else if (e.stroke == 'up') {
           setTimeout(() => {
             let key = this.get_key(e.key)
-            if (key) key.pressed = false
-            app.record(key.pitch, 'up') // Yes we record the autoplay
+            if (key) {
+              key.pressed = false
+              app.record(key.pitch, 'up') // Yes we record the autoplay
+            }
           }, e.time * 1000)
           synth.triggerRelease(e.key, now + e.time)
         }
       })
+    },
+    remove_recording: function (index) {
+      this.recordings.splice(index, 1)
+      localStorage.setItem('recordings', JSON.stringify(this.recordings))
     },
     get_note: function (key) {
       return this.binding.low[key] || this.binding.high[key]
