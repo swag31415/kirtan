@@ -74,6 +74,18 @@ document.body.addEventListener('keyup', function (e) {
   }
 })
 
+function uploader() {
+  let uploader = new FileReader()
+  uploader.onload = function () {
+    app.recordings.push(JSON.parse(uploader.result))
+    M.toast({html: 'Recording loaded successfully', classes: 'green'})
+  }
+  uploader.onerror = function () {
+    M.toast({html: 'Failed to upload a recording', classes: 'red'})
+  }
+  return uploader
+}
+
 const app = new Vue({
   el: '#app',
   data: {
@@ -132,6 +144,10 @@ const app = new Vue({
     download: function (record) {
       var blob = new Blob([JSON.stringify(record)], { type: "application/json" })
       saveAs(blob, record.name + '.json')
+    },
+    upload: function (event) {
+      [...event.target.files].forEach(file => uploader().readAsText(file))
+      M.Modal.getInstance(document.getElementById('upload')).close()
     },
     play: function (data) {
       let now = Tone.now()
