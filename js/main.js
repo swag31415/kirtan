@@ -39,7 +39,6 @@ const synth = new Tone.Sampler({
 var key_index = -8
 const valid_index_range = { min: -25, max: 54 }
 
-var record = []
 document.body.addEventListener('keydown', function (e) {
   if (this != e.target) return;
   let key = app.get_note(e.key)
@@ -128,10 +127,13 @@ const app = new Vue({
     },
     stop_recording: function () {
       this.recording = false
-      this.recordings.push({
+      let record = {
         name: 'Recording ' + (this.recordings.length + 1),
         data: this.buffer
-      })
+      }
+      this.recordings.push(record)
+      if (this.buffer.length > 0)
+        Firebase.firestore.add('harmonium-recordings', record)
       this.buffer = []
     },
     record: function (pitch, stroke) {
