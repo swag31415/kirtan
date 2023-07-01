@@ -1,7 +1,6 @@
 const Pitch_Detector = {
   buffer_size: 2048,
   buffer: new Float32Array(2048),
-  tone_buffer: [],
   audio_context: Tone.context,
   init: async function () {
     let stream = await navigator.mediaDevices.getUserMedia({"audio": {
@@ -33,11 +32,12 @@ const Pitch_Detector = {
     this.analyser.getFloatTimeDomainData(this.buffer)
     let res = this.autoCorrelate(this.buffer, this.audio_context.sampleRate)
     if (res > 0) {
-      this.tone_buffer.push(res)
-      if (this.tone_buffer.length > 5) this.tone_buffer.shift()
-      let tmp = this.tone_buffer.slice().sort((a, b) => a - b)
-      this.pitch = tmp[Math.floor(tmp.length / 2)]
-      this.onNote(Tone.Frequency(this.pitch).toNote())
+      tmp_octave = this.get_octave(res)
+      if (!this.octave || Math.random() < 0.05) this.octave = tmp_octave
+      if (Math.abs(tmp_octave - this.octave) < 0.5) {
+        this.pitch = res
+        this.onNote(Tone.Frequency(this.pitch).toNote())  
+      }
     } else this.onPause()
   },
   autoCorrelate: function (buf, sampleRate) {
@@ -88,5 +88,15 @@ const Pitch_Detector = {
     b = (x3 - x1) / 2
     if (a) T0 = T0 - b / (2 * a)
     return sampleRate / T0
+  },
+  get_octave: function (frequency) {
+    const CONCERT_PITCH = 440
+    const A = 2 ** (1 / 12)
+    const C0_PITCH = 16.35
+    const N = Math.round(12 * Math.log2(frequency / CONCERT_PITCH))
+    const Fn = CONCERT_PITCH * A ** N
+    const octave = Math.log2(Fn / C0_PITCH)
+  
+    return octave
   }
 }
